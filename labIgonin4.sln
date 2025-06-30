@@ -1,28 +1,126 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "labIgonin4", "labIgonin4\labIgonin4.vcxproj", "{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Debug|x64.ActiveCfg = Debug|x64
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Debug|x64.Build.0 = Debug|x64
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Debug|x86.ActiveCfg = Debug|Win32
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Debug|x86.Build.0 = Debug|Win32
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Release|x64.ActiveCfg = Release|x64
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Release|x64.Build.0 = Release|x64
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Release|x86.ActiveCfg = Release|Win32
-		{B6BB52C1-861A-4FFA-87F3-A86C33D970AB}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+#include <iostream>             // Edge - это рёбра, vertices - вершины.
+#include <vector>
+#include <string>
+#include <sstream>
+
+using namespace std;
+struct Edge {
+    string from;
+    string to;
+    int weight;
+};
+
+int main() {
+    vector<string> vertices;           // Вершины
+    vector<Edge> edges;                // Рёбра
+
+    cout << "Enter edges (FROM TO WEIGHT), one per line. Empty line ends:\n";
+
+    while (true) {
+        string line;
+        getline(cin, line);
+        if (line.empty()) break;
+
+        stringstream ss(line);
+        string a, b;
+        int w;
+        ss >> a >> b >> w;
+
+
+        Edge e;
+        e.from = a;
+        e.to = b;
+        e.weight = w;
+        edges.push_back(e);
+
+        bool aIn = false, bIn = false;
+        for (string v : vertices) {
+            if (v == a) aIn = true;
+            if (v == b) bIn = true;
+        }
+        if (!aIn) vertices.push_back(a);
+        if (!bIn) vertices.push_back(b);
+    }
+
+
+    string start, end;
+    cout << "Enter start vertex: ";
+    cin >> start;
+    cout << "Enter end vertex: ";
+    cin >> end;
+
+    const int INF = 1000000000;
+    int n = vertices.size();
+    vector<int> dist(n, INF);
+    vector<bool> visited(n, false);
+    vector<int> prev(n, -1);
+
+
+    int startIdx = -1, endIdx = -1;
+    for (int i = 0; i < n; i++) {
+        if (vertices[i] == start) startIdx = i;
+        if (vertices[i] == end) endIdx = i;
+    }
+
+    if (startIdx == -1 || endIdx == -1) {
+        cout << "Start or end vertex not found!\n";
+        return 1;
+    }
+
+    dist[startIdx] = 0;
+
+
+    for (int i = 0; i < n; i++) {
+        int v = -1;
+        for (int j = 0; j < n; j++) {
+            if (!visited[j] && (v == -1 || dist[j] < dist[v])) {
+                v = j;
+            }
+        }
+
+        if (dist[v] == INF) break; 
+
+        visited[v] = true;
+
+        for (Edge e : edges) {
+            if (e.from == vertices[v]) {
+
+                int toIdx = -1;
+                for (int j = 0; j < n; j++) {
+                    if (vertices[j] == e.to) {
+                        toIdx = j;
+                        break;
+                    }
+                }
+
+                if (toIdx != -1 && dist[v] + e.weight < dist[toIdx]) {
+                    dist[toIdx] = dist[v] + e.weight;
+                    prev[toIdx] = v;
+                }
+            }
+        }
+    }
+
+
+    if (dist[endIdx] == INF) {
+        cout << "No path from " << start << " to " << end << ".\n";
+        return 0;
+    }
+
+
+    vector<int> path;
+    for (int v = endIdx; v != -1; v = prev[v]) {
+        path.push_back(v);
+    }
+
+
+    cout << "Path: ";
+    for (int i = path.size() - 1; i >= 0; i--) {
+        cout << vertices[path[i]];
+        if (i > 0) cout << " -> ";
+    }
+
+    cout << "\nTotal cost: " << dist[endIdx] << endl;
+
+    return 0;
+}
