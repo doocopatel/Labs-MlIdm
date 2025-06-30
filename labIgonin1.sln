@@ -1,28 +1,102 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "labIgonin1", "labIgonin1\labIgonin1.vcxproj", "{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Debug|x64.ActiveCfg = Debug|x64
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Debug|x64.Build.0 = Debug|x64
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Debug|x86.ActiveCfg = Debug|Win32
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Debug|x86.Build.0 = Debug|Win32
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Release|x64.ActiveCfg = Release|x64
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Release|x64.Build.0 = Release|x64
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Release|x86.ActiveCfg = Release|Win32
-		{3B97B8FA-E6C5-480C-8B17-FC2DF8A1C404}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+#include <iostream>
+#include <set>
+#include <string>
+
+using namespace std;
+
+bool matchesMask(const string& input, const string& mask) {
+    if (input.size() != mask.size()) return false;
+
+    for (size_t i = 0; i < mask.size(); ++i) {
+        char m = mask[i];
+        char ch = input[i];
+
+        if (m == 'c') {
+            if (!isdigit(ch)) return false;
+        }
+        else if (m == 'i') {
+            if (!isdigit(ch) || (ch - '0') % 2 != 0) return false;
+        }
+        else if (m == 'b') {
+            if (!isalpha(ch)) return false;
+        }
+        else {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int main() {
+    int n;
+    string elements;
+    string mask = "ccib";
+
+    set<string> Array1, Array2;
+    set<string> ob, pere, rAB, rBA, simR;
+
+    cout << "Enter size of set 1: ";
+    cin >> n;
+
+    cout << "Enter elements of set 1: ";
+    for (int i = 0; i < n; i++) {
+        cin >> elements;
+
+        if (!matchesMask(elements, mask)) {
+            cout << "Element '" << elements << "' does not match mask '" << mask << "'\n";
+            --i;
+            continue;
+        }
+
+        Array1.insert(elements);
+    }
+
+    cout << "Enter size of set 2: ";
+    cin >> n;
+
+    cout << "Enter elements of set 2: ";
+    for (int i = 0; i < n; i++) {
+        cin >> elements;
+
+        if (!matchesMask(elements, mask)) {
+            cout << "Element '" << elements << "' does not match mask '" << mask << "'\n";
+            --i;
+            continue;
+        }
+
+        Array2.insert(elements);
+    }
+
+    for (auto x : Array1) ob.insert(x);
+    for (auto x : Array2) ob.insert(x);
+
+    for (auto x : Array1)
+        if (Array2.count(x)) pere.insert(x);
+
+    for (auto x : Array1)
+        if (!Array2.count(x)) rAB.insert(x);
+
+    for (auto x : Array2)
+        if (!Array1.count(x)) rBA.insert(x);
+
+    for (auto x : rAB) simR.insert(x);
+    for (auto x : rBA) simR.insert(x);
+
+    cout << "\nOb: ";
+    for (auto x : ob) cout << x << " ";
+
+    cout << "\npere: ";
+    for (auto x : pere) cout << x << " ";
+
+    cout << "\nArray1 \\ Array2: ";
+    for (auto x : rAB) cout << x << " ";
+
+    cout << "\nArray2 \\ Array1: ";
+    for (auto x : rBA) cout << x << " ";
+
+    cout << "\nSimR: ";
+    for (auto x : simR) cout << x << " ";
+
+    return 0;
+}
